@@ -41,18 +41,19 @@ INSERT INTO emp VALUES('8080', 'ANTON-ALIAKSEI ILYIN', to_date('30.03.1992', 'dd
 --12.Удалите все записи из таблицы TMP_EMP. Добавьте в нее информацию о сотрудниках, которые работают 
 --   клерками в настоящий момент.
 DELETE FROM tmp_emp; 
-INSERT INTO tmp_emp SELECT empno, empname, birthdate FROM emp E 
-			JOIN career C ON E.empno = C.empno 
-			JOIN jobno J ON C.jobno = J.jobno 
-			WHERE J.jobname = 'CLERCK' AND C.enddate IS NULL;   
+INSERT INTO tmp_emp SELECT empno, empname, birthdate FROM emp 
+		WHERE emp.empno = (SELECT empno FROM career C 
+										JOIN job J ON C.jobno = J.jobno 
+										WHERE jobname = 'CLERCK' 
+										AND enddate IS NULL);
+ 
 
 --13.Добавьте в таблицу TMP_EMP информацию о тех сотрудниках, которые уже не работают на предприятии, а в период 
 --   работы занимали только одну должность.
 
 
 --14.Выполните тот же запрос для тех сотрудников, которые никогда не приступали к работе на предприятии.
-INSERT INTO tmp_emp SELECT empno, empname, birthdate FROM emp E JOIN career C ON E.empno = C.empno 
-		WHERE C.startdate IS NULL;
+INSERT INTO tmp_emp SELECT empno, empname, birthdate FROM career JOIN emp USING(empno) WHERE startdate IS NULL;
 
 --15.Удалите все записи из таблицы TMP_JOB и добавьте в нее информацию по тем специальностям, которые не 
 --   используются в настоящий момент на предприятии.
