@@ -43,9 +43,9 @@ INSERT INTO emp VALUES('8080', 'ANTON-ALIAKSEI ILYIN', to_date('30.03.1992', 'dd
 DELETE FROM tmp_emp; 
 INSERT INTO tmp_emp SELECT empno, empname, birthdate FROM emp 
 		WHERE emp.empno = (SELECT empno FROM career C 
-										JOIN job J ON C.jobno = J.jobno 
-										WHERE jobname = 'CLERCK' 
-										AND enddate IS NULL);
+				JOIN job J ON C.jobno = J.jobno 
+				WHERE jobname = 'CLERCK' 
+				AND enddate IS NULL);
  
 
 --13.Добавьте в таблицу TMP_EMP информацию о тех сотрудниках, которые уже не работают на предприятии, а в период 
