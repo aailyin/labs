@@ -21,12 +21,12 @@ UPDATE EMP SET EMPNAME = LCASE(EMPNAME) WHERE EMPNAME LIKE 'J%';
 UPDATE emp SET empname = INITCAP(empname) WHERE INSTR(empname, ' ') != 0; 
 
 --7.Приведите в таблице EMP имена служащих к верхнему регистру.
-UPDATE EMP SET EMPNAME = UCASE(EMPNAME)
+UPDATE EMP SET EMPNAME = UCASE(EMPNAME);
 
 --8.Исправьте даты рождения в таблице EMP, в которых год приходится на первый век нашей эры по следующему 
 --	правилу: даты до 03 года 
 --  включительно относятся к 21-му веку, а с 04 по 99 год - к 20-му веку.
---  Эту хрень делать не нужно!:)
+--  Это делать не нужно!:)
 
 --9.Перенесите отдел исследований (RESEARCH) в тот же город, в котором расположен отдел продаж (SALES).
 UPDATE DEPT SET DEPTADDR = (SELECT DEPTADDR FROM DEPT WHERE DEPTNAME = 'SALES') WHERE DEPTNAME = 'RESEARCH';
@@ -36,7 +36,8 @@ UPDATE DEPT SET DEPTADDR = (SELECT DEPTADDR FROM DEPT WHERE DEPTNAME = 'SALES') 
 INSERT INTO emp VALUES('8080', 'ANTON-ALIAKSEI ILYIN', to_date('30.03.1992', 'dd.mm.yyyy'));  
 
 --11.Определите нового сотрудника (см. предыдущее задание) на работу в бухгалтерию (отдел ACCOUNTING) начиная с текущей даты.
-
+INSERT INTO CAREER VALUES (1004, 8000, 10, CURRENT_DATE, NULL);
+INSERT INTO CAREER VALUES (1004, 8001, 10, CURRENT_DATE, NULL);
 
 --12.Удалите все записи из таблицы TMP_EMP. Добавьте в нее информацию о сотрудниках, которые работают 
 --   клерками в настоящий момент.
@@ -45,12 +46,20 @@ INSERT INTO tmp_emp SELECT empno, empname, birthdate FROM emp
 		WHERE emp.empno = (SELECT empno FROM career C 
 				JOIN job J ON C.jobno = J.jobno 
 				WHERE jobname = 'CLERCK' 
+				AND startdate IS NOT NULL
 				AND enddate IS NULL);
  
 
 --13.Добавьте в таблицу TMP_EMP информацию о тех сотрудниках, которые уже не работают на предприятии, а в период 
 --   работы занимали только одну должность.
-
+INSERT INTO TMP_EMP
+    SELECT * FROM EMP E
+    WHERE E.EMPNO IN (SELECT EMPNO
+                        FROM CAREER C
+                        WHERE ENDDATE IS NOT NULL
+                                        AND ENDDATE < CURRENT_DATE
+                                        having COUNT(SELECT EMPNO FROM CAREER K
+                                        WHERE C.EMPNO = K.EMPNO)=1);
 
 --14.Выполните тот же запрос для тех сотрудников, которые никогда не приступали к работе на предприятии.
 INSERT INTO tmp_emp SELECT empno, empname, birthdate FROM career JOIN emp USING(empno) WHERE startdate IS NULL;
@@ -70,7 +79,7 @@ INSERT INTO salary SELECT empno, EXTRACT(month from add_months(sysdate, -1)),
 		WHERE ENDDATE IS NULL;
 
 --17.Удалите данные о зарплате за прошлый год.
-DELETE FROM SALARY WHERE YEAR = 2012;
+DELETE FROM SALARY WHERE YEAR = EXTRACT(YEAR FROM CURRENT_DATE)-1;;
 
 --18.Удалите информацию о карьере сотрудников, которые в настоящий момент уже не работают на предприятии, 
 --   но когда-то работали.
